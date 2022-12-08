@@ -30,8 +30,8 @@ const uint8_t help[]=
 		"\r\n*-------------------------------*\r\n"
 		"help : print this message\r\n"
 		"pinout : print all pins used\r\n"
-		"powerOn : switch on the motor control driver\r\n"
-		"powerOff : switch on the motor control driver\r\n";
+		"power on : switch on the motor control driver\r\n"
+		"power off : switch on the motor control driver\r\n";
 
 const uint8_t pinout[]=
 		"\r\n*-------------------------------*"

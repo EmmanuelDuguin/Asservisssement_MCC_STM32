@@ -64,6 +64,8 @@ void Error_Handler(void);
 #define ISO_RESET_GPIO_Port GPIOC
 #define LED_Pin GPIO_PIN_5
 #define LED_GPIO_Port GPIOA
+#define Motor_Reset_Pin GPIO_PIN_9
+#define Motor_Reset_GPIO_Port GPIOC
 #define T_SWDIO_Pin GPIO_PIN_13
 #define T_SWDIO_GPIO_Port GPIOA
 #define T_SWCLK_Pin GPIO_PIN_14
