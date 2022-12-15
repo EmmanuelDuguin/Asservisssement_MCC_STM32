@@ -171,6 +171,7 @@ void shellExec(void){
 	else if(strcmp(argv[0],"alpha")==0)
 		{
 			//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
+			//test changement
 			motorSetAlpha(atoi (argv[1]));
 		}
 	else{
