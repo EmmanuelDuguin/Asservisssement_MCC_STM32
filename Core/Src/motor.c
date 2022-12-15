@@ -22,11 +22,11 @@ int speed_value=5311/2;
  * @retval None
  */
 void motorPowerOn(void){
+	motorSetAlpha(50);
+
 	HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin,GPIO_PIN_SET); // just for test, you can delete it
 	for(int i=0;i<30;i++){}
 	HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin,GPIO_PIN_RESET);
-
-	motorSetSpeed(0);
 
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);
@@ -55,13 +55,7 @@ void motorPowerOff(void){
  * @retval None
  */
 void motorSetSpeed(int speed){
-	if (speed>100 || speed<-100) {
-		shellCmdNotFound();
-	}
-	else {
-		speed_value=(int) ((5311/200)*speed+(5311/2));
-		TIM1->CCR1 =speed_value;
-	}
+
 }
 
 void motorSetAlpha(int alpha){

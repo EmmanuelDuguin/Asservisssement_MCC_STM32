@@ -164,6 +164,15 @@ void shellExec(void){
 		HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
 		motorPowerOff();
 	}
+	else if(strcmp(argv[0],"alpha")==0)
+	{
+		HAL_UART_Transmit(&huart2, pinout, sizeof(pinout), HAL_MAX_DELAY);
+	}
+	else if(strcmp(argv[0],"alpha")==0)
+		{
+			//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
+			motorSetAlpha(atoi (argv[1]));
+		}
 	else{
 		shellCmdNotFound();
 	}
