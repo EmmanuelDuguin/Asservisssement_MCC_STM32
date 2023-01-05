@@ -11,9 +11,10 @@
 
 #include "motor.h"
 #include "tim.h"
+#include "shell.h"
 
 //Private variable begin
-uint8_t auto_reload=TIM1->ARR;
+
 int speed_value=5311/2;
 //Private variable end
 
@@ -58,9 +59,11 @@ void motorSetSpeed(int speed){
 
 }
 
+/** Fonction qui verfie dans un premier temps que la valeur de alpha est valable puis entre dans les registres CRR1 et CRR2 des CH 1 et 2**/
 void motorSetAlpha(int alpha){
+	int pulse_value=0;
 	if (alpha>100 || alpha<0) {
-			shellCmdNotFound();
+		shellCmdNotFound();
 		}
 		else {
 			pulse_value=(int) 5311*alpha/100;

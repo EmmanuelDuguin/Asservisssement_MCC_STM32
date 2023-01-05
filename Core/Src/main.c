@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -39,6 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ADC_Buffer_size 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,8 +56,14 @@
 extern uint8_t uartRxReceived;
 extern uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
 extern uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
+uint16_t ADC_buffer[ADC_Buffer_size];
+uint16_t current_value_buffer[100];
 
 uint8_t flag=0;
+uint8_t ADC_flag =0;
+
+int raw_value=0;
+float current_value;
 
 /* USER CODE END PV */
 
@@ -97,12 +106,29 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	HAL_UART_Receive_IT(&huart2, uartRxBuffer, UART_RX_BUFFER_SIZE);
 	HAL_Delay(1);
 	shellInit();
+
+	//On effectue une calibration
+	if (HAL_OK!= HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED))
+		Error_Handler();
+
+	//On start le timer qui débute les convertions par interruption
+	if (HAL_OK!=HAL_TIM_Base_Start(&htim2))
+		Error_Handler();
+	//on start le DMA
+	if (HAL_OK!= HAL_ADC_Start_DMA(&hadc1,ADC_buffer,ADC_Buffer_size))
+		Error_Handler();
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,6 +146,26 @@ int main(void)
 		if (flag){
 			motorPowerOn();
 			flag=0;
+		}
+
+		if(ADC_flag==1){
+			//Additonner les 10 valeurs acquises dans raw_value
+			raw_value=0;
+			for (int i=0;i<ADC_Buffer_size;i++){
+				raw_value+=ADC_buffer[i];
+			}
+
+			//convertion en la valeur moyenne de courant réel
+			current_value=((raw_value/ADC_Buffer_size)*3.3/4095.0-2.5)*12.0;
+
+			//affichage dans l'uart de cette valeur
+			/**
+			sprintf(current_value_buffer,"{ADC Value : %1.2f}\r\n",current_value);
+			HAL_UART_Transmit(&huart2, current_value_buffer,strlen((char*) current_value_buffer)*sizeof(char), HAL_MAX_DELAY);
+			**/
+
+			//réinitialisation du flag
+			ADC_flag=0;
 		}
     /* USER CODE END WHILE */
 
@@ -174,8 +220,15 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+//la fonction de callback qui met un flag a 1 pour dire qu'il y a eu un appuie sur le Blue Button
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	flag=1;
+}
+
+//une fois que mon buffer est plein, on appel cette fonction qui set le ADC_flag a 1
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	ADC_flag=1;
 }
 
 /* USER CODE END 4 */

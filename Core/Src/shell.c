@@ -164,11 +164,13 @@ void shellExec(void){
 		HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
 		motorPowerOff();
 	}
-	else if(strcmp(argv[0],"alpha")==0)
+
+	/**else if(strcmp(argv[0],"alpha")==0)
 	{
 		HAL_UART_Transmit(&huart2, pinout, sizeof(pinout), HAL_MAX_DELAY);
-	}
-	else if(strcmp(argv[0],"alpha")==0)
+	}**/
+
+	else if((strcmp(argv[0],"alpha")==0) && argv[1]!=NULL)
 		{
 			//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
 			//test changement
