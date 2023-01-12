@@ -71,6 +71,29 @@ void motorSetAlpha(int alpha){
 			TIM1->CCR2 =5311-pulse_value;
 		}
 }
+/**
+void current_loop(){uint16_t Current_loop_buffer,Te,Ki,Kp,Ireq,Imes)
 
+}
+**/
 
+//Assure la suturation des valeurs de alpha calculé par la boucle de courrant
+
+uint16_t verif_alpha(uint16_t alpha){
+	if (alpha>=100)
+		return 100;
+	else if (alpha<=0)
+		return 0;
+	else
+		return alpha;
+}
+
+float verif_alpha_float(float alpha){
+	if (alpha>=100)
+		return 100;
+	else if (alpha<=0)
+		return 0;
+	else
+		return alpha;
+}
 

@@ -15,6 +15,7 @@
 #include "shell.h"
 #include "usart.h"
 #include "motor.h"
+#include "main.h"
 
 
 const uint8_t prompt[]="user@Nucleo-STM32G4RB31>>";
@@ -59,6 +60,9 @@ uint8_t	argc;
 extern uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
 extern uint8_t stringSize;
 
+//Variable personnel ajoutées
+extern uint8_t CL_flag;
+extern float Ireq;
 
 
 /**
@@ -165,17 +169,25 @@ void shellExec(void){
 		motorPowerOff();
 	}
 
-	/**else if(strcmp(argv[0],"alpha")==0)
-	{
-		HAL_UART_Transmit(&huart2, pinout, sizeof(pinout), HAL_MAX_DELAY);
-	}**/
-
 	else if((strcmp(argv[0],"alpha")==0) && argv[1]!=NULL)
 		{
 			//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
-			//test changement
 			motorSetAlpha(atoi (argv[1]));
 		}
+	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"on")==0))
+		{
+			CL_flag=1;
+		}
+	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"off")==0))
+		{
+			CL_flag=0;
+		}
+	else if((strcmp(argv[0],"ireq")==0)&&argv[1]!=NULL)
+			{
+				Ireq=(atof(argv[1]));
+				stringSize = snprintf((char*)uartTxBuffer,UART_TX_BUFFER_SIZE,"Consigne de courant : %f\r\n",Ireq);
+				HAL_UART_Transmit(&huart2, uartTxBuffer, stringSize, HAL_MAX_DELAY);
+			}
 	else{
 		shellCmdNotFound();
 	}
