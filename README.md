@@ -11,3 +11,7 @@ Génération des PWM:
 Mise a jour du Jeudi 5 Janvier 2023:
   >capteur de courant opérationnel
   >début de l'encodeur 
+  
+Mise a jour du Jeudi 12 Janvier 2023:
+   >Encodeur Ok avec affichage de la vitesse
+   >Asservissement en courant fonctionnel
