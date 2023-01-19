@@ -4,3 +4,5 @@
 ../Core/Src/motor.c:63:6:motorSetAlpha	24	static
 ../Core/Src/motor.c:82:10:verif_alpha	16	static
 ../Core/Src/motor.c:91:7:verif_alpha_float	16	static
+../Core/Src/motor.c:102:10:verif_current	16	static
+../Core/Src/motor.c:111:7:verif_current_float	16	static

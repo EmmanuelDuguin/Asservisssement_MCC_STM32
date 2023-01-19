@@ -97,3 +97,23 @@ float verif_alpha_float(float alpha){
 		return alpha;
 }
 
+//Assure la suturation des valeurs du courrent calculé par la boucle de vitesse
+
+uint16_t verif_current(uint16_t current){
+	if (current>=8)
+		return 8;
+	else if (current<=-8)
+		return -8;
+	else
+		return current;
+}
+
+float verif_current_float(float current){
+	if (current>=8)
+		return 8;
+	else if (current<=-8)
+		return -8;
+	else
+		return current;
+}
+

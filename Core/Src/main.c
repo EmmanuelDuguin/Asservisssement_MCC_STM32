@@ -61,26 +61,40 @@ uint16_t current_value_buffer[100];
 uint16_t ohmega_buffer[100];
 
 
-uint8_t flag=0;
-uint8_t ADC_flag =0;
-uint8_t TIMER_4_flag=0;
-uint16_t cnt_tim_3_value=32767;
-float ohmega=0;
+uint8_t Button_flag=0;				//flag du Blue_button qui initialise les PWM
+uint8_t ADC_flag =0;				//Mise du flag=1 par le DMA lorsque l'ADC  fait ADC_Buffer_size conversions
+uint8_t TIMER_4_flag=0;				//flag de callbak du timer4
+uint16_t cnt_tim_3_value=32767;		//valeur de départ du compteur du timer. On remet timer3->CNT a cette valeur après chaque call back du timer4
+float omega=0;						//valeur de vitesse en tr/min
 
-int raw_value=0;
-float current_value;
+int raw_value=0;					//valeur brut de la mesure de courant en sortie d'ADC
+float current_value;				//valeur du courant réel en A
 
-//Variables pour la boucle de courant
-float Ireq=0.0;
-float Kp=0.00001;					//gain de proportionnel
-float Ki=400;					//gain de l'itégrateur
-float Te=1/16000.0;				//période de 16KHz
+
+//_________Variables pour la boucle de vitesse__________
+float omreq=0.0;					//consigne de vitesse en tr/min
+float epsilon_s=0;					//erreur=omreq-omega
+float Kps=0.01;					//gain du proportionnel vitesse (speed)
+float Kis=0.03;						//gain de l'intégrateur vitesse (speed)
+float Tes=1/10.0;					//période de 16KHz
+float current1=0;				//erreur affecté du correcteur proportionel (epsilon_s*kps)
+float current2=0.0;					//erreur affecté du correcteur integral (epsilon_s*Kis/p)
+float SL_buffer[3]={0.0,0.0,0.0};	//Speed_loop buffer: le tableau contenant les valeurs presentes et précédantes des valeurs d'alpha et d'epsilon = [epsilon_s[n-1],epsilon_s[n],current2[n-1])
+uint8_t SL_flag=0;					//flag pour la boucle de vitesse: Speed loop flag
+
+
+//_________Variables pour la boucle de courant_________
+float Ireq=0.0;						//consigne de courant (=current1+current2, erreur corrigée de la boule de vitesse)
+float epsilon=0;					//erreur (=Ireq-current_value)
+float Kp=0.00001;					//gain de proportionnel courant
+float Ki=400;						//gain de l'itégrateur courant
+float Te=1/16000.0;					//période de 16KHz
+uint16_t alpha1=0;					//erreur affecté du correcteur proportionel (epsilon*k)
+float alpha2=50.0;					//erreur affecté du correcteur integral (epsilon*Ki/p)
+uint16_t alpha3=0;					//consigne de rapport cyclique (=alpha1+alpha2)
 float CL_buffer[3]={0.0,0.0,50.0};	//le tableau contenant les valeurs presentes et précédantes des valeurs d'alpha et d'epsilon = [epsilon[n-1],epsilon[n],alpha2[n-1])
-uint16_t alpha1=0;
-float alpha2=50.0;
-uint16_t alpha3=0;
-float epsilon=0;
-uint8_t CL_flag=0;
+uint8_t CL_flag=0;					//flag pour la boucle de courant: Current loop flag
+
 
 /* USER CODE END PV */
 
@@ -166,42 +180,45 @@ int main(void)
 			}
 			uartRxReceived = 0;
 		}
-		if (flag){
+		if (Button_flag){
 			motorPowerOn();
-			flag=0;
+			Button_flag=0;
 		}
 
 		if(ADC_flag==1){
+			//Verification tous les 1/(16kHz)
+
 			//Additonner les 10 valeurs acquises dans raw_value
 			raw_value=0;
 			for (int i=0;i<ADC_Buffer_size;i++){
 				raw_value+=ADC_buffer[i];
 			}
 
-			//convertion en la valeur moyenne de courant réel
-			current_value=((raw_value/ADC_Buffer_size)*3.3/4095.0-2.5)*12.0;
 
+			current_value=((raw_value/ADC_Buffer_size)*3.3/4095.0-2.5)*12.0;	//convertion en la valeur moyenne de courant réel
+
+			/**
 			//affichage dans l'uart de cette valeur
+			sprintf(current_value_buffer,"{ADC Value : %1.2f}\r\n",current_value);
+			HAL_UART_Transmit(&huart2, current_value_buffer,strlen((char*) current_value_buffer)*sizeof(char), HAL_MAX_DELAY);
+			**/
 
-			//sprintf(current_value_buffer,"{ADC Value : %1.2f}\r\n",current_value);
-			//HAL_UART_Transmit(&huart2, current_value_buffer,strlen((char*) current_value_buffer)*sizeof(char), HAL_MAX_DELAY);
+			//---------------------ASSERVISSEMENT EN COURANT---------------------------------
 
-
-			//ASSERVISSEMENT EN COURANT
-
+			//condition d'entré pour la boucle de courrant (asservissement à 16kHz)
 			if (CL_flag){
-			epsilon=Ireq-current_value;
+			epsilon=Ireq-current_value;										//calcul de l'erreur
 
-			CL_buffer[1]=epsilon;		//écriture de la nouvelle valeur
+			CL_buffer[1]=epsilon;											//écriture de la nouvelle valeur d'erreur
 
 			alpha1=(uint16_t) (Kp*epsilon);
 			alpha2=CL_buffer[2]+(Ki*Te/2.0)*(CL_buffer[1]+CL_buffer[0]);
-			alpha2=verif_alpha_float(alpha2);		//vérifi que la valeur de alpha soit compris enre 0 et 100
-			alpha3=alpha2+alpha1;
-			alpha3=verif_alpha(alpha3);
+			alpha2=verif_alpha_float(alpha2);								//Antiwindup du correcteur PI de courant
+			alpha3=alpha2+alpha1;											//Erreur corrigée
+			alpha3=verif_alpha(alpha3);										//Saturation de l'erreur
 
-			CL_buffer[0]=CL_buffer[1]; 	//epsilon[n-1]=epsilon[n]
-			CL_buffer[2]=alpha2; 		//epsilon[n-1]=epsilon[n]
+			CL_buffer[0]=CL_buffer[1]; 										//epsilon[n-1]=epsilon[n]
+			CL_buffer[2]=alpha2; 											//alpha2[n-1]=alpha2
 			motorSetAlpha(alpha3);
 			}
 
@@ -210,12 +227,35 @@ int main(void)
 		}
 
 		if (TIMER_4_flag){
-			//valeur de vitesse en tour/min
-			ohmega=(cnt_tim_3_value-32767.0)/(0.1*4096.0)*60;
 
-			//ecrire dans l'UART la valeur retournée
-			/**sprintf(ohmega_buffer,"{Vitesse : %1.2f}\r\n",ohmega);
-			HAL_UART_Transmit(&huart2, ohmega_buffer,strlen((char*) ohmega_buffer)*sizeof(char), HAL_MAX_DELAY);**/
+			omega=(cnt_tim_3_value-32767.0)/(0.1*4096.0)*60;	//valeur de vitesse en tour/min
+
+
+
+			 //(Ecrire dans l'UART la valeur de vitesse retournée)
+			 //sprintf(ohmega_buffer,"{Vitesse : %1.2f tour/min}\r\n",omega);
+			 //HAL_UART_Transmit(&huart2, ohmega_buffer,strlen((char*) ohmega_buffer)*sizeof(char), HAL_MAX_DELAY);
+
+
+
+			//________________________ASSERVISSEMENT EN VITESSE___________________________
+
+			//condition d'entré pour la boucle de vitesse (asservissement à 10Hz)
+			if (SL_flag){
+				epsilon_s=omreq-omega;													//calcul de l'erreur
+
+				SL_buffer[1]=epsilon_s;													//écriture de la nouvelle valeur
+
+				current1=(Kps*epsilon_s);
+				current2=SL_buffer[2]+(Kis*Tes/2.0)*(SL_buffer[1]+SL_buffer[0]);
+				current2=verif_current_float(current2);									//antiwindup du correcteur PI de vitesse
+				Ireq=current1+current2;														//consigne de courrant pour la boucle de courant
+				Ireq=verif_current(Ireq);												//Saturation de la consigne de courant: vérifi que la valeur de courant soit compris enre -8A et 8A
+
+				SL_buffer[0]=SL_buffer[1]; 												//epsilon_s[n-1]=epsilon_s[n]
+				SL_buffer[2]=current2; 													//current2[n-1]=current2[n]
+			}
+
 			TIMER_4_flag=0;
 		}
 
@@ -277,7 +317,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 //la fonction de callback qui met un flag a 1 pour dire qu'il y a eu un appuie sur le Blue Button
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-	flag=1;
+	Button_flag=1;
 }
 
 //une fois que mon buffer est plein, on appel cette fonction qui set le ADC_flag a 1
@@ -304,8 +344,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+
+  //____________CALLBACK du TIMER 4_______________
+  //Le timer4 cadensé a 10Hz pour la vitesse
   if (htim->Instance == TIM4) {
-     cnt_tim_3_value=htim3.Instance->CNT;
+	 cnt_tim_3_value=htim3.Instance->CNT;
      htim3.Instance->CNT=32767;
      TIMER_4_flag=1;
    }

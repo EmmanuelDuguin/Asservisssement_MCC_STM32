@@ -1,13 +1,13 @@
 /**
-  ******************************************************************************
-  * @file    shell.c
-  * @brief   This file provides code for shell interface
-  ******************************************************************************
-  *  Created on: Nov 7, 2022
-  *      Author: nicolas
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    shell.c
+ * @brief   This file provides code for shell interface
+ ******************************************************************************
+ *  Created on: Nov 7, 2022
+ *      Author: nicolas
+ *
+ ******************************************************************************
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,45 +61,48 @@ extern uint8_t uartTxBuffer[UART_TX_BUFFER_SIZE];
 extern uint8_t stringSize;
 
 //Variable personnel ajoutées
-extern uint8_t CL_flag;
-extern float Ireq;
+extern uint8_t SL_flag;		//flag pour la boucle de vitesse
+extern uint8_t CL_flag;		//flag pour la boucle de courant
+extern float Ireq;			//consigne de courant
+extern float omreq;			//consigne de vitesse
+extern float omega;			//vitesse en tr/min
 
 
 /**
-  * @brief  Send a stating message
-  * @retval None
-  */
+ * @brief  Send a stating message
+ * @retval None
+ */
 void shellInit(void){
 	HAL_UART_Transmit(&huart2, started, sizeof(started), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, prompt, sizeof(prompt), HAL_MAX_DELAY);
 }
 
 /**
-  * @brief  Send the prompt
-  * @retval None
-  */
+ * @brief  Send the prompt
+ * @retval None
+ */
 void shellPrompt(void){
 	HAL_UART_Transmit(&huart2, prompt, sizeof(prompt), HAL_MAX_DELAY);
 }
 
 /**
-  * @brief  Send the default message if the command is not found
-  * @retval None
-  */
+ * @brief  Send the default message if the command is not found
+ * @retval None
+ */
 void shellCmdNotFound(void){
 	HAL_UART_Transmit(&huart2, cmdNotFound, sizeof(cmdNotFound), HAL_MAX_DELAY);
 }
 
 /**
-  * @brief  Function called for saving the new character and call and setup argc and argv variable if ENTER is pressed
-  * @retval 1 if a new command is available, 0 if not.
-  */
+ * @brief  Function called for saving the new character and call and setup argc and argv variable if ENTER is pressed
+ * @retval 1 if a new command is available, 0 if not.
+ */
 uint8_t shellGetChar(void){
 	uint8_t newCmdReady = 0;
 	char* token;
 
 	switch(uartRxBuffer[0]){
-		// If Enter, update argc and argv
+	// If Enter, update argc and argv
 	case ASCII_CR:
 		HAL_UART_Transmit(&huart2, newline, sizeof(newline), HAL_MAX_DELAY);
 		cmdBuffer[idxCmd] = '\0';
@@ -128,9 +131,9 @@ uint8_t shellGetChar(void){
 }
 
 /**
-  * @brief  Call function depends of the value of argc and argv
-  * @retval None
-  */
+ * @brief  Call function depends of the value of argc and argv
+ * @retval None
+ */
 void shellExec(void){
 	if(strcmp(argv[0],"set")==0){
 		if(strcmp(argv[1],"PA5")==0 && ((strcmp(argv[2],"0")==0)||(strcmp(argv[2],"1")==0)) ){
@@ -170,24 +173,45 @@ void shellExec(void){
 	}
 
 	else if((strcmp(argv[0],"alpha")==0) && argv[1]!=NULL)
-		{
-			//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
-			motorSetAlpha(atoi (argv[1]));
-		}
+	{
+		//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
+		motorSetAlpha(atoi (argv[1]));
+	}
 	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"on")==0))
-		{
-			CL_flag=1;
-		}
+	{
+		CL_flag=1;
+	}
 	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"off")==0))
-		{
-			CL_flag=0;
-		}
+	{
+		CL_flag=0;
+	}
+	else if((strcmp(argv[0],"sl")==0)&&(strcmp(argv[1],"on")==0))
+	{
+		CL_flag=1;
+		SL_flag=1;
+	}
+	else if((strcmp(argv[0],"sl")==0)&&(strcmp(argv[1],"off")==0))
+	{
+		CL_flag=0;
+		SL_flag=0;
+	}
 	else if((strcmp(argv[0],"ireq")==0)&&argv[1]!=NULL)
-			{
-				Ireq=(atof(argv[1]));
-				stringSize = snprintf((char*)uartTxBuffer,UART_TX_BUFFER_SIZE,"Consigne de courant : %f\r\n",Ireq);
-				HAL_UART_Transmit(&huart2, uartTxBuffer, stringSize, HAL_MAX_DELAY);
-			}
+	{
+		Ireq=(atof(argv[1]));
+		stringSize = snprintf((char*)uartTxBuffer,UART_TX_BUFFER_SIZE,"Consigne de courant : %f\r\n",Ireq);
+		HAL_UART_Transmit(&huart2, uartTxBuffer, stringSize, HAL_MAX_DELAY);
+	}
+	else if((strcmp(argv[0],"omreq")==0)&&argv[1]!=NULL)
+	{
+		omreq=(atof(argv[1]));
+		stringSize = snprintf((char*)uartTxBuffer,UART_TX_BUFFER_SIZE,"Consigne de vitesse : %f\r\n",omreq);
+		HAL_UART_Transmit(&huart2, uartTxBuffer, stringSize, HAL_MAX_DELAY);
+	}
+	else if(strcmp(argv[0],"speed")==0)
+		{
+		stringSize = snprintf((char*)uartTxBuffer,UART_TX_BUFFER_SIZE,"Vitesse : %f\r\n",omega);
+		HAL_UART_Transmit(&huart2, uartTxBuffer, stringSize, HAL_MAX_DELAY);
+		}
 	else{
 		shellCmdNotFound();
 	}
