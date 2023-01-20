@@ -211,20 +211,19 @@ int main(void)
 
 			CL_buffer[1]=epsilon;											//écriture de la nouvelle valeur d'erreur
 
-			alpha1=(uint16_t) (Kp*epsilon);
-			alpha2=CL_buffer[2]+(Ki*Te/2.0)*(CL_buffer[1]+CL_buffer[0]);
+			alpha1=(uint16_t) (Kp*epsilon);									//erreur corrigée du proportionnel
+			alpha2=CL_buffer[2]+(Ki*Te/2.0)*(CL_buffer[1]+CL_buffer[0]);	//erreur corrigée de l'intégral
 			alpha2=verif_alpha_float(alpha2);								//Antiwindup du correcteur PI de courant
-			alpha3=alpha2+alpha1;											//Erreur corrigée
+			alpha3=alpha2+alpha1;											//Erreur corrigée final
 			alpha3=verif_alpha(alpha3);										//Saturation de l'erreur
 
 			CL_buffer[0]=CL_buffer[1]; 										//epsilon[n-1]=epsilon[n]
 			CL_buffer[2]=alpha2; 											//alpha2[n-1]=alpha2
-			motorSetAlpha(alpha3);
+			motorSetAlpha(alpha3);											//nouvelle consigne de rapport cyclique
 			}
 
-			//réinitialisation du flag
-			ADC_flag=0;
-		}
+			ADC_flag=0;														//réinitialisation du flag
+			}
 
 		if (TIMER_4_flag){
 
@@ -242,18 +241,18 @@ int main(void)
 
 			//condition d'entré pour la boucle de vitesse (asservissement à 10Hz)
 			if (SL_flag){
-				epsilon_s=omreq-omega;													//calcul de l'erreur
+				epsilon_s=omreq-omega;												//calcul de l'erreur
 
-				SL_buffer[1]=epsilon_s;													//écriture de la nouvelle valeur
+				SL_buffer[1]=epsilon_s;												//écriture de la nouvelle valeur d'erreur
 
 				current1=(Kps*epsilon_s);
 				current2=SL_buffer[2]+(Kis*Tes/2.0)*(SL_buffer[1]+SL_buffer[0]);
-				current2=verif_current_float(current2);									//antiwindup du correcteur PI de vitesse
-				Ireq=current1+current2;														//consigne de courrant pour la boucle de courant
-				Ireq=verif_current(Ireq);												//Saturation de la consigne de courant: vérifi que la valeur de courant soit compris enre -8A et 8A
+				current2=verif_current_float(current2);								//antiwindup du correcteur PI de vitesse
+				Ireq=current1+current2;												//consigne de courrant pour la boucle de courant
+				Ireq=verif_current(Ireq);											//Saturation:vérifi que la valeur de courant soit compris enre -8A et 8A
 
-				SL_buffer[0]=SL_buffer[1]; 												//epsilon_s[n-1]=epsilon_s[n]
-				SL_buffer[2]=current2; 													//current2[n-1]=current2[n]
+				SL_buffer[0]=SL_buffer[1]; 											//epsilon_s[n-1]=epsilon_s[n]
+				SL_buffer[2]=current2; 												//current2[n-1]=current2[n]
 			}
 
 			TIMER_4_flag=0;
@@ -337,23 +336,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  /* USER CODE BEGIN Callback 0 */
+	/* USER CODE BEGIN Callback 0 */
 
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6) {
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
 
-  //____________CALLBACK du TIMER 4_______________
-  //Le timer4 cadensé a 10Hz pour la vitesse
-  if (htim->Instance == TIM4) {
-	 cnt_tim_3_value=htim3.Instance->CNT;
-     htim3.Instance->CNT=32767;
-     TIMER_4_flag=1;
-   }
+	//____________CALLBACK du TIMER 4_______________
+	//Le timer4 cadencé a 10Hz pour la vitesse
+	if (htim->Instance == TIM4) {					//fin de comptage pour le TIM4
+		cnt_tim_3_value=htim3.Instance->CNT;		//sauvegarde de la valeur du compteur du TIM3
+		htim3.Instance->CNT=32767;					//ré initialisation de la valeur du compteur à 32767
+		TIMER_4_flag=1;								//flag permetant les calcul de convertion de la vitesse et boucle de vitesse
+	}
 
-  /* USER CODE END Callback 1 */
+	/* USER CODE END Callback 1 */
 }
 
 /**

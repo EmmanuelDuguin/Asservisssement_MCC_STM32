@@ -4,7 +4,7 @@
  * @brief   This file provides code for motor control
  ******************************************************************************
  *  Created on: Nov 7, 2022
- *      Author: nicolas
+ *      Author: nicolas and Emmanuel DUGUIN
  *
  ******************************************************************************
  */
@@ -16,6 +16,7 @@
 //Private variable begin
 
 int speed_value=5311/2;
+
 //Private variable end
 
 /**
@@ -59,7 +60,12 @@ void motorSetSpeed(int speed){
 
 }
 
-/** Fonction qui verfie dans un premier temps que la valeur de alpha est valable puis entre dans les registres CRR1 et CRR2 des CH 1 et 2**/
+/**
+ * @brief  Set the cyclic ratio
+ * @note   This function verify if the input is inside the cyclic ratio range and set the timer registers for PWM modification
+ * @param  cyclic ratio : between 0 and 100
+ * @retval None
+ */
 void motorSetAlpha(int alpha){
 	int pulse_value=0;
 	if (alpha>100 || alpha<0) {
@@ -71,14 +77,14 @@ void motorSetAlpha(int alpha){
 			TIM1->CCR2 =5311-pulse_value;
 		}
 }
+
+
 /**
-void current_loop(){uint16_t Current_loop_buffer,Te,Ki,Kp,Ireq,Imes)
-
-}
-**/
-
-//Assure la suturation des valeurs de alpha calculé par la boucle de courrant
-
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for uint_16_t input
+ * @param  alpha : cyclic ratio
+ * @retval uint16_t alpha : into the range [0;100]
+ */
 uint16_t verif_alpha(uint16_t alpha){
 	if (alpha>=100)
 		return 100;
@@ -88,6 +94,12 @@ uint16_t verif_alpha(uint16_t alpha){
 		return alpha;
 }
 
+/**
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for float input
+ * @param  alpha : cyclic ratio
+ * @retval float alpha : into the range [0;100]
+ */
 float verif_alpha_float(float alpha){
 	if (alpha>=100)
 		return 100;
@@ -97,8 +109,12 @@ float verif_alpha_float(float alpha){
 		return alpha;
 }
 
-//Assure la suturation des valeurs du courrent calculé par la boucle de vitesse
-
+/**
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the required current is into the acceptable range.Used for uint_16_t input
+ * @param  uint16_t current
+ * @retval uint16_t current:  into the range [-8;8]
+ */
 uint16_t verif_current(uint16_t current){
 	if (current>=8)
 		return 8;
@@ -107,7 +123,12 @@ uint16_t verif_current(uint16_t current){
 	else
 		return current;
 }
-
+/**
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for float input
+ * @param  float current
+ * @retval float current:  into the range [-8;8]
+ */
 float verif_current_float(float current){
 	if (current>=8)
 		return 8;

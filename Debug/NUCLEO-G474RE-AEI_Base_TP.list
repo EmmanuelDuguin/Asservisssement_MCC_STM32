@@ -37,11 +37,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0002a922  00000000  00000000  000443e8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001ba77  00000000  00000000  0006ed0a  2**0
+ 17 .debug_line   0001ba78  00000000  00000000  0006ed0a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00114155  00000000  00000000  0008a781  2**0
+ 18 .debug_str    00114155  00000000  00000000  0008a782  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  0019e8d6  2**0
+ 19 .comment      00000050  00000000  00000000  0019e8d7  2**0
                   CONTENTS, READONLY
  20 .debug_frame  0000769c  00000000  00000000  0019e928  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -2136,7 +2136,7 @@ int main(void)
  8001580:	4aa4      	ldr	r2, [pc, #656]	; (8001814 <main+0x45c>)
  8001582:	6053      	str	r3, [r2, #4]
 
-			alpha1=(uint16_t) (Kp*epsilon);
+			alpha1=(uint16_t) (Kp*epsilon);									//erreur corrigée du proportionnel
  8001584:	4ba4      	ldr	r3, [pc, #656]	; (8001818 <main+0x460>)
  8001586:	ed93 7a00 	vldr	s14, [r3]
  800158a:	4ba1      	ldr	r3, [pc, #644]	; (8001810 <main+0x458>)
@@ -2147,7 +2147,7 @@ int main(void)
  800159c:	b29a      	uxth	r2, r3
  800159e:	4b9f      	ldr	r3, [pc, #636]	; (800181c <main+0x464>)
  80015a0:	801a      	strh	r2, [r3, #0]
-			alpha2=CL_buffer[2]+(Ki*Te/2.0)*(CL_buffer[1]+CL_buffer[0]);
+			alpha2=CL_buffer[2]+(Ki*Te/2.0)*(CL_buffer[1]+CL_buffer[0]);	//erreur corrigée de l'intégral
  80015a2:	4b9c      	ldr	r3, [pc, #624]	; (8001814 <main+0x45c>)
  80015a4:	689b      	ldr	r3, [r3, #8]
  80015a6:	4618      	mov	r0, r3
@@ -2201,7 +2201,7 @@ int main(void)
  800162c:	eef0 7a40 	vmov.f32	s15, s0
  8001630:	4b7d      	ldr	r3, [pc, #500]	; (8001828 <main+0x470>)
  8001632:	edc3 7a00 	vstr	s15, [r3]
-			alpha3=alpha2+alpha1;											//Erreur corrigée
+			alpha3=alpha2+alpha1;											//Erreur corrigée final
  8001636:	4b79      	ldr	r3, [pc, #484]	; (800181c <main+0x464>)
  8001638:	881b      	ldrh	r3, [r3, #0]
  800163a:	ee07 3a90 	vmov	s15, r3
@@ -2234,19 +2234,18 @@ int main(void)
  8001676:	681b      	ldr	r3, [r3, #0]
  8001678:	4a66      	ldr	r2, [pc, #408]	; (8001814 <main+0x45c>)
  800167a:	6093      	str	r3, [r2, #8]
-			motorSetAlpha(alpha3);
+			motorSetAlpha(alpha3);											//nouvelle consigne de rapport cyclique
  800167c:	4b6b      	ldr	r3, [pc, #428]	; (800182c <main+0x474>)
  800167e:	881b      	ldrh	r3, [r3, #0]
  8001680:	4618      	mov	r0, r3
  8001682:	f000 fa1b 	bl	8001abc <motorSetAlpha>
 			}
 
-			//réinitialisation du flag
-			ADC_flag=0;
+			ADC_flag=0;														//réinitialisation du flag
  8001686:	4b6a      	ldr	r3, [pc, #424]	; (8001830 <main+0x478>)
  8001688:	2200      	movs	r2, #0
  800168a:	701a      	strb	r2, [r3, #0]
-		}
+			}
 
 		if (TIMER_4_flag){
  800168c:	4b69      	ldr	r3, [pc, #420]	; (8001834 <main+0x47c>)
@@ -2294,7 +2293,7 @@ int main(void)
  80016e2:	781b      	ldrb	r3, [r3, #0]
  80016e4:	2b00      	cmp	r3, #0
  80016e6:	f000 80d7 	beq.w	8001898 <main+0x4e0>
-				epsilon_s=omreq-omega;													//calcul de l'erreur
+				epsilon_s=omreq-omega;												//calcul de l'erreur
  80016ea:	4b57      	ldr	r3, [pc, #348]	; (8001848 <main+0x490>)
  80016ec:	ed93 7a00 	vldr	s14, [r3]
  80016f0:	4b53      	ldr	r3, [pc, #332]	; (8001840 <main+0x488>)
@@ -2303,7 +2302,7 @@ int main(void)
  80016fa:	4b54      	ldr	r3, [pc, #336]	; (800184c <main+0x494>)
  80016fc:	edc3 7a00 	vstr	s15, [r3]
 
-				SL_buffer[1]=epsilon_s;													//écriture de la nouvelle valeur
+				SL_buffer[1]=epsilon_s;												//écriture de la nouvelle valeur d'erreur
  8001700:	4b52      	ldr	r3, [pc, #328]	; (800184c <main+0x494>)
  8001702:	681b      	ldr	r3, [r3, #0]
  8001704:	4a52      	ldr	r2, [pc, #328]	; (8001850 <main+0x498>)
@@ -2363,7 +2362,7 @@ int main(void)
  8001794:	4603      	mov	r3, r0
  8001796:	4a33      	ldr	r2, [pc, #204]	; (8001864 <main+0x4ac>)
  8001798:	6013      	str	r3, [r2, #0]
-				current2=verif_current_float(current2);									//antiwindup du correcteur PI de vitesse
+				current2=verif_current_float(current2);								//antiwindup du correcteur PI de vitesse
  800179a:	4b32      	ldr	r3, [pc, #200]	; (8001864 <main+0x4ac>)
  800179c:	edd3 7a00 	vldr	s15, [r3]
  80017a0:	eeb0 0a67 	vmov.f32	s0, s15
@@ -2371,7 +2370,7 @@ int main(void)
  80017a8:	eef0 7a40 	vmov.f32	s15, s0
  80017ac:	4b2d      	ldr	r3, [pc, #180]	; (8001864 <main+0x4ac>)
  80017ae:	edc3 7a00 	vstr	s15, [r3]
-				Ireq=current1+current2;														//consigne de courrant pour la boucle de courant
+				Ireq=current1+current2;												//consigne de courrant pour la boucle de courant
  80017b2:	4b29      	ldr	r3, [pc, #164]	; (8001858 <main+0x4a0>)
  80017b4:	ed93 7a00 	vldr	s14, [r3]
  80017b8:	4b2a      	ldr	r3, [pc, #168]	; (8001864 <main+0x4ac>)
@@ -2379,7 +2378,7 @@ int main(void)
  80017be:	ee77 7a27 	vadd.f32	s15, s14, s15
  80017c2:	4b12      	ldr	r3, [pc, #72]	; (800180c <main+0x454>)
  80017c4:	edc3 7a00 	vstr	s15, [r3]
-				Ireq=verif_current(Ireq);												//Saturation de la consigne de courant: vérifi que la valeur de courant soit compris enre -8A et 8A
+				Ireq=verif_current(Ireq);											//Saturation:vérifi que la valeur de courant soit compris enre -8A et 8A
  80017c8:	4b10      	ldr	r3, [pc, #64]	; (800180c <main+0x454>)
  80017ca:	edd3 7a00 	vldr	s15, [r3]
  80017ce:	e04b      	b.n	8001868 <main+0x4b0>
@@ -2432,12 +2431,12 @@ int main(void)
  8001882:	4b07      	ldr	r3, [pc, #28]	; (80018a0 <main+0x4e8>)
  8001884:	edc3 7a00 	vstr	s15, [r3]
 
-				SL_buffer[0]=SL_buffer[1]; 												//epsilon_s[n-1]=epsilon_s[n]
+				SL_buffer[0]=SL_buffer[1]; 											//epsilon_s[n-1]=epsilon_s[n]
  8001888:	4b06      	ldr	r3, [pc, #24]	; (80018a4 <main+0x4ec>)
  800188a:	685b      	ldr	r3, [r3, #4]
  800188c:	4a05      	ldr	r2, [pc, #20]	; (80018a4 <main+0x4ec>)
  800188e:	6013      	str	r3, [r2, #0]
-				SL_buffer[2]=current2; 													//current2[n-1]=current2[n]
+				SL_buffer[2]=current2; 												//current2[n-1]=current2[n]
  8001890:	4b05      	ldr	r3, [pc, #20]	; (80018a8 <main+0x4f0>)
  8001892:	681b      	ldr	r3, [r3, #0]
  8001894:	4a03      	ldr	r2, [pc, #12]	; (80018a4 <main+0x4ec>)
@@ -2621,47 +2620,47 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  8001986:	b082      	sub	sp, #8
  8001988:	af00      	add	r7, sp, #0
  800198a:	6078      	str	r0, [r7, #4]
-  /* USER CODE BEGIN Callback 0 */
+	/* USER CODE BEGIN Callback 0 */
 
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6) {
  800198c:	687b      	ldr	r3, [r7, #4]
  800198e:	681b      	ldr	r3, [r3, #0]
  8001990:	4a0d      	ldr	r2, [pc, #52]	; (80019c8 <HAL_TIM_PeriodElapsedCallback+0x44>)
  8001992:	4293      	cmp	r3, r2
  8001994:	d101      	bne.n	800199a <HAL_TIM_PeriodElapsedCallback+0x16>
-    HAL_IncTick();
+		HAL_IncTick();
  8001996:	f001 f975 	bl	8002c84 <HAL_IncTick>
-  }
-  /* USER CODE BEGIN Callback 1 */
+	}
+	/* USER CODE BEGIN Callback 1 */
 
-  //____________CALLBACK du TIMER 4_______________
-  //Le timer4 cadensé a 10Hz pour la vitesse
-  if (htim->Instance == TIM4) {
+	//____________CALLBACK du TIMER 4_______________
+	//Le timer4 cadencé a 10Hz pour la vitesse
+	if (htim->Instance == TIM4) {					//fin de comptage pour le TIM4
  800199a:	687b      	ldr	r3, [r7, #4]
  800199c:	681b      	ldr	r3, [r3, #0]
  800199e:	4a0b      	ldr	r2, [pc, #44]	; (80019cc <HAL_TIM_PeriodElapsedCallback+0x48>)
  80019a0:	4293      	cmp	r3, r2
  80019a2:	d10d      	bne.n	80019c0 <HAL_TIM_PeriodElapsedCallback+0x3c>
-	 cnt_tim_3_value=htim3.Instance->CNT;
+		cnt_tim_3_value=htim3.Instance->CNT;		//sauvegarde de la valeur du compteur du TIM3
  80019a4:	4b0a      	ldr	r3, [pc, #40]	; (80019d0 <HAL_TIM_PeriodElapsedCallback+0x4c>)
  80019a6:	681b      	ldr	r3, [r3, #0]
  80019a8:	6a5b      	ldr	r3, [r3, #36]	; 0x24
  80019aa:	b29a      	uxth	r2, r3
  80019ac:	4b09      	ldr	r3, [pc, #36]	; (80019d4 <HAL_TIM_PeriodElapsedCallback+0x50>)
  80019ae:	801a      	strh	r2, [r3, #0]
-     htim3.Instance->CNT=32767;
+		htim3.Instance->CNT=32767;					//ré initialisation de la valeur du compteur à 32767
  80019b0:	4b07      	ldr	r3, [pc, #28]	; (80019d0 <HAL_TIM_PeriodElapsedCallback+0x4c>)
  80019b2:	681b      	ldr	r3, [r3, #0]
  80019b4:	f647 72ff 	movw	r2, #32767	; 0x7fff
  80019b8:	625a      	str	r2, [r3, #36]	; 0x24
-     TIMER_4_flag=1;
+		TIMER_4_flag=1;								//flag permetant les calcul de convertion de la vitesse et boucle de vitesse
  80019ba:	4b07      	ldr	r3, [pc, #28]	; (80019d8 <HAL_TIM_PeriodElapsedCallback+0x54>)
  80019bc:	2201      	movs	r2, #1
  80019be:	701a      	strb	r2, [r3, #0]
-   }
+	}
 
-  /* USER CODE END Callback 1 */
+	/* USER CODE END Callback 1 */
 }
  80019c0:	bf00      	nop
  80019c2:	3708      	adds	r7, #8
@@ -2833,8 +2832,11 @@ void motorSetSpeed(int speed){
  8001aba:	4770      	bx	lr
 
 08001abc <motorSetAlpha>:
-
-/** Fonction qui verfie dans un premier temps que la valeur de alpha est valable puis entre dans les registres CRR1 et CRR2 des CH 1 et 2**/
+ * @brief  Set the cyclic ratio
+ * @note   This function verify if the input is inside the cyclic ratio range and set the timer registers for PWM modification
+ * @param  cyclic ratio : between 0 and 100
+ * @retval None
+ */
 void motorSetAlpha(int alpha){
  8001abc:	b580      	push	{r7, lr}
  8001abe:	b084      	sub	sp, #16
@@ -2887,11 +2889,11 @@ void motorSetAlpha(int alpha){
  8001b14:	40012c00 	.word	0x40012c00
 
 08001b18 <verif_alpha>:
-}
-**/
-
-//Assure la suturation des valeurs de alpha calculé par la boucle de courrant
-
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for uint_16_t input
+ * @param  alpha : cyclic ratio
+ * @retval uint16_t alpha : into the range [0;100]
+ */
 uint16_t verif_alpha(uint16_t alpha){
  8001b18:	b480      	push	{r7}
  8001b1a:	b083      	sub	sp, #12
@@ -2923,7 +2925,11 @@ uint16_t verif_alpha(uint16_t alpha){
  8001b42:	4770      	bx	lr
 
 08001b44 <verif_alpha_float>:
-
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for float input
+ * @param  alpha : cyclic ratio
+ * @retval float alpha : into the range [0;100]
+ */
 float verif_alpha_float(float alpha){
  8001b44:	b480      	push	{r7}
  8001b46:	b083      	sub	sp, #12
@@ -2960,9 +2966,11 @@ float verif_alpha_float(float alpha){
  8001b90:	42c80000 	.word	0x42c80000
 
 08001b94 <verif_current>:
-
-//Assure la suturation des valeurs du courrent calculé par la boucle de vitesse
-
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the required current is into the acceptable range.Used for uint_16_t input
+ * @param  uint16_t current
+ * @retval uint16_t current:  into the range [-8;8]
+ */
 uint16_t verif_current(uint16_t current){
  8001b94:	b480      	push	{r7}
  8001b96:	b083      	sub	sp, #12
@@ -2989,7 +2997,11 @@ uint16_t verif_current(uint16_t current){
  8001bb4:	4770      	bx	lr
 
 08001bb6 <verif_current_float>:
-
+ * @brief  Allow the saturation of the input parameter
+ * @note   This function verify if the cyclic ratio range is respected. Used for float input
+ * @param  float current
+ * @retval float current:  into the range [-8;8]
+ */
 float verif_current_float(float current){
  8001bb6:	b480      	push	{r7}
  8001bb8:	b083      	sub	sp, #12
@@ -3492,7 +3504,7 @@ void shellExec(void){
  8001f58:	4603      	mov	r3, r0
  8001f5a:	2b00      	cmp	r3, #0
  8001f5c:	d103      	bne.n	8001f66 <shellExec+0x20a>
-		CL_flag=1;
+		CL_flag=1;	//plus utilisé avec boucle de vitesse, flag mis a jour par la commande cl on/cl off
  8001f5e:	4b3c      	ldr	r3, [pc, #240]	; (8002050 <shellExec+0x2f4>)
  8001f60:	2201      	movs	r2, #1
  8001f62:	701a      	strb	r2, [r3, #0]

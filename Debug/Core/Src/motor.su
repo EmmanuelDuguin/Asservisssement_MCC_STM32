@@ -1,8 +1,8 @@
-../Core/Src/motor.c:25:6:motorPowerOn	16	static
-../Core/Src/motor.c:42:6:motorPowerOff	16	static
-../Core/Src/motor.c:58:6:motorSetSpeed	16	static
-../Core/Src/motor.c:63:6:motorSetAlpha	24	static
-../Core/Src/motor.c:82:10:verif_alpha	16	static
-../Core/Src/motor.c:91:7:verif_alpha_float	16	static
-../Core/Src/motor.c:102:10:verif_current	16	static
-../Core/Src/motor.c:111:7:verif_current_float	16	static
+../Core/Src/motor.c:26:6:motorPowerOn	16	static
+../Core/Src/motor.c:43:6:motorPowerOff	16	static
+../Core/Src/motor.c:59:6:motorSetSpeed	16	static
+../Core/Src/motor.c:69:6:motorSetAlpha	24	static
+../Core/Src/motor.c:88:10:verif_alpha	16	static
+../Core/Src/motor.c:103:7:verif_alpha_float	16	static
+../Core/Src/motor.c:118:10:verif_current	16	static
+../Core/Src/motor.c:132:7:verif_current_float	16	static

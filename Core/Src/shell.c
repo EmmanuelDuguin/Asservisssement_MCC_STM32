@@ -161,6 +161,9 @@ void shellExec(void){
 	{
 		HAL_UART_Transmit(&huart2, pinout, sizeof(pinout), HAL_MAX_DELAY);
 	}
+
+	//_____________ENSEMBLE DES COMMANDES SHELL CREES__________________
+
 	else if((strcmp(argv[0],"power")==0)&&(strcmp(argv[1],"on")==0))
 	{
 		HAL_UART_Transmit(&huart2, powerOn, sizeof(powerOn), HAL_MAX_DELAY);
@@ -174,12 +177,11 @@ void shellExec(void){
 
 	else if((strcmp(argv[0],"alpha")==0) && argv[1]!=NULL)
 	{
-		//HAL_UART_Transmit(&huart2, powerOff, sizeof(powerOff), HAL_MAX_DELAY);
 		motorSetAlpha(atoi (argv[1]));
 	}
 	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"on")==0))
 	{
-		CL_flag=1;
+		CL_flag=1;	//plus utilisé avec boucle de vitesse, flag mis a jour par la commande cl on/cl off
 	}
 	else if((strcmp(argv[0],"cl")==0)&&(strcmp(argv[1],"off")==0))
 	{
